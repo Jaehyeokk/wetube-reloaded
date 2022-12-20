@@ -7,12 +7,14 @@ html(lang="ko")
 
   body
     header
-      if fakeUser.loggedIn
+      if fakeUser && fakeUser.loggedIn
         small Hello #{fakeUser.username}
       nav
         ul
           li
-            if fakeUser.loggedIn
+            a(href='/videos/upload') Upload Video
+          li
+            if fakeUser && fakeUser.loggedIn
               a(href='/logout') Logout
             else 
               a(href='/login') Login
