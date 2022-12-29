@@ -1,0 +1,14 @@
+extends layouts/default
+
+block content
+  if video
+    h2=video.title
+    p=video.description
+    small=video.createdAt
+    ul
+      each hashtag in video.hashtags
+        li=hashtag
+
+    a(href=`${video._id}/edit`) Edit &rarr;
+    br
+    a(href=`${video._id}/delete`) Delete &rarr;

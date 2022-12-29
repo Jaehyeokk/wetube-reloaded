@@ -2,6 +2,7 @@ import express from 'express'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import morgan from 'morgan'
+import { localsMiddleware } from './middlewares'
 import rootRouter from './routers/rootRouter'
 import userRouter from './routers/userRouter'
 import videoRouter from './routers/videoRouter'
@@ -20,7 +21,7 @@ app.use(session({
     mongoUrl: process.env.DB_URL
   })
 }))
-
+app.use(localsMiddleware)
 app.use('/', rootRouter)
 app.use('/users', userRouter)
 app.use('/videos', videoRouter)

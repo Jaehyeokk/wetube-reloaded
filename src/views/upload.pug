@@ -1,0 +1,10 @@
+extends layouts/default
+
+block content
+  if errorMessage
+    h3=errorMessage
+  form(method="POST")
+    input(name="title", placeholder="Title.", type="text", maxlength=80, required)
+    input(name="description", placeholder="Description.", type="text", minlength=20, required)
+    input(name="hashtags", placeholder="Hashtags, seperated by comma.", type="text")
+    input(type="submit", value="Upload")

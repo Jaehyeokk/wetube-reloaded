@@ -1,3 +1,9 @@
 extends layouts/default
+include mixins/video
 
 block content
+  if videos
+    each video in videos
+      +video(video)
+    else
+      div No Videos.

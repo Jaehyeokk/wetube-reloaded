@@ -1,0 +1,9 @@
+mixin video(video)
+  div 
+    h2
+      a(href=`/videos/${video._id}`)=video.title
+    p=video.description
+    ul
+      if video.hashtags
+        each hashtag in video.hashtags
+          li=hashtag
