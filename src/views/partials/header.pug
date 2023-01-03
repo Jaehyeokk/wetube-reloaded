@@ -8,7 +8,11 @@ header
         a(href="/videos/upload") Upload
       li
         a(href="/search") Search
-      li
-        a(href="/login") Login
-      li
-        a(href="/join") Join
+      if (!loggedIn)
+        li
+          a(href="/login") Login
+        li
+          a(href="/join") Join  
+      else
+        li
+          a(href="/logout")  Logout
