@@ -1,9 +1,10 @@
 import bcrypt from 'bcrypt'
-import e from 'express';
 import fetch from 'node-fetch'
 import User from '../models/User'
+import Video from '../models/Video';
 
 export const getJoin = (req, res) => res.render('join', { pageTitle: 'Join' });
+
 export const postJoin = async (req, res) => {
   const {name, username, email, password, password2, location} = req.body
   if (password !== password2) {
@@ -17,17 +18,15 @@ export const postJoin = async (req, res) => {
     await User.create({
       name, username, email, password, avatarUrl: '', socialOnly: false, location
     })
-    return res.redirect('/login')  
+    return res.redirect('/login')
   } catch (error) {
     return res.render('join', {pageTitle: 'Join', errorMessage: error._message})
   }
   
 };
 
-// 
 export const getLogin = (req, res) => res.render('login', { pageTitle: 'Login' })
 
-// 
 export const postLogin = async (req, res) => {
   const pageTitle = 'Login'
   const { username, password } = req.body
@@ -48,10 +47,50 @@ export const logout = (req, res) => {
   return res.redirect('/')
 }
 
+export const getEdit = (req, res) => {
+  return res.render('edit-profile', { pageTitle: 'Edit Profile' })
+}
+
+export const postEdit = async (req, res) => {
+  const {
+    session: {
+      user: { _id, avatarUrl, email: sessionEmail, username: sessionUsername }
+    },
+    body: { name, email, username, location },
+    file,
+  } = req
 
 
-export const see = (req, res) => res.send('See')
-export const edit = (req, res) => res.send('Edit User');
+  let searchParams = []
+  if (sessionEmail !== email) searchParams.push({ email })
+  if (sessionUsername !== username) searchParams.push({ username })
+  if (searchParams.length > 0) {
+    const foundUser = await User.findOne({ $or: searchParams })
+
+    if (foundUser && foundUser._id.toString() !== _id) {
+      return res.render('edit-profile', { pageTitle: 'Edit Profile', errorMessage: 'This username/email is already taken.' })
+    }
+  }
+  
+  const updatedUser = await User.findByIdAndUpdate(_id, {
+    avatarUrl: file ? file.path : avatarUrl,
+    name,
+    email,
+    username,
+    location
+  }, { new: true })
+
+  req.session.user = updatedUser
+  // req.session.user = {
+  //   ...req.session.user,
+  //   name,
+  //   email,
+  //   username,
+  //   location
+  // }
+
+  return res.redirect('/users/edit')
+}
 
 export const startGithubLogin = (req, res) => {
   const baseUrl = `https://github.com/login/oauth/authorize`
@@ -89,7 +128,6 @@ export const finishGithubLogin = async (req, res) => {
         Authorization: `token ${access_token}`
       }
     })).json()
-    console.log(userData)
     const emailData = await (
       await fetch(`${apiUrl}/user/emails`, {
         headers: {
@@ -97,7 +135,6 @@ export const finishGithubLogin = async (req, res) => {
         } 
       })
     ).json()
-    console.log(emailData)
     const emailObj = emailData.find((email) => {
       return email.primary === true && email.verified === true
     })
@@ -124,4 +161,43 @@ export const finishGithubLogin = async (req, res) => {
   } else {
     return res.redirect('/login')
   }
+}
+
+export const getChangePassword = (req, res) => {
+  if (req.session.user.socialOnly) {
+    return res.redirect('/')
+  }
+  return res.render('users/change-password', { pageTitle: 'Change password' })
+}
+
+export const postChangePassword = async (req, res) => {
+  const {
+    session: {
+      user: { _id, password }
+    },
+    body: { oldPassword, newPassword, newPasswordConfirmation }
+  } = req
+  const user = await User.findById(_id)
+  const ok = await bcrypt.compare(oldPassword, user.password)
+  if (!ok) {
+    return res.status(400).render('users/change-password', { pageTitle: 'Change password', errorMessage: 'The current password is incorrect.' })
+  }
+  if (newPassword !== newPasswordConfirmation) {
+    return res.status(400).render('users/change-password', { pageTitle: 'Change password', errorMessage: 'The password does not match the confirmation.' })
+  }
+
+  user.password = newPassword
+  await user.save()
+  // send notification
+  return res.redirect('/users/logout')
+}
+
+export const see = async (req, res) => {
+  const { id } = req.params
+  const user = await User.findById(id).populate('videos')
+  console.log(user)
+  if (!user) {
+    return res.status(404).render('404', { pageTitle: 'User not found.' })
+  }
+  return res.render('users/profile', { pageTitle: user.name, user })
 }
