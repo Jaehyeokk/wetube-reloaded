@@ -2,9 +2,11 @@ extends ../base
 include ../mixins/video
 
 block content
-  h1 Hello
-
-  each video in user.videos 
-    +video(video)
-  else
-    li Sorry noting found.
+  .profile__data
+    img.avatar(src="/" + user.avatarUrl)
+    h3= user.name
+  .video-grid
+    each video in user.videos
+      +video(video)
+    else
+      span.empty__message No videos found

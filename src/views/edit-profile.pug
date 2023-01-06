@@ -1,17 +1,14 @@
-extends base.pug
+extends base
 
 block content
-  img(src=`/${loggedInUser.avatarUrl}`, width="100", heighT="100")
-  if errorMessage
-    span=errorMessage
-  form(method="POST", enctype="multipart/form-data")
+  form.edit-profile__form(method="POST", enctype="multipart/form-data")
     label(for="avatar") Avatar
-    input(name="avatar", id="avatar", type="file", accept="image/*")
-    input(name="name" placeholder="Name" type="text", value=loggedInUser.name, required)
-    input(name="email" placeholder="Email" type="text", value=loggedInUser.email, required)
-    input(name="username" placeholder="Username" type="text", value=loggedInUser.username, required)
-    input(name="location" placeholder="Location" type="text" value=loggedInUser.location, required)
+    input#avatar(type="file", name="avatar", accept="image/*")
+    input(placeholder="Name", name="name", type="text", required, value=loggedInUser.name)
+    input(placeholder="Email", name="email", type="email", required, value=loggedInUser.email)
+    input(placeholder="Username", name="username", type="text", required, value=loggedInUser.username)
+    input(placeholder="Location", name="location", type="text", required, value=loggedInUser.location)
     input(type="submit", value="Update Profile")
-    hr
     if !loggedInUser.socialOnly
-      a(href="change-password") Change password &rarr;
+      .edit-profile__password
+        a(href="change-password") Change Password &rarr;
