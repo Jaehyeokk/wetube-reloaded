@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "The best way to watch a videos.",
   "scripts": {
-    "dev:server": "nodemon",
+    "dev": "nodemon",
     "dev:assets": "webpack",
     "format:pug": "npx prettier --write '**/*.pug'"
   },

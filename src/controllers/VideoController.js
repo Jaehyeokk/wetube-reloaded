@@ -4,7 +4,7 @@ import User from '../models/User';
 // Home
 export const home = async (req, res) => {
   try {
-    const videos = await Video.find({}).sort({ createdAt: 'desc' });
+    const videos = await Video.find({}).sort({ createdAt: 'desc' }).populate('owner');
     return res.render('home', { pageTitle: 'Home', videos });
   } catch (error) {
     return res.render('server-error');
@@ -132,4 +132,16 @@ export const search = async (req, res) => {
   }
 
   return res.render('search', { pageTitle: 'Search', videos });
+};
+
+export const registerView = async (req, res) => {
+  const { id } = req.params;
+  const video = await Video.findById(id);
+  // if (!video) {
+  //   return res.sendStatus(404);
+  // }
+  console.log(video);
+  video.meta.views = video.meta.views + 1;
+  await video.save();
+  return res.sendStatus(200);
 };
